@@ -1,0 +1,57 @@
+const timeSlots = ["8:00", "9:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00"];
+const days = ["Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato", "Domenica"];
+let currentUser = null;
+let reservations = JSON.parse(localStorage.getItem("reservations")) || {};
+
+function login() {
+  const user = document.getElementById("user").value.trim();
+  if (!user) return alert("Inserisci un nome valido.");
+  currentUser = user;
+  document.getElementById("login").style.display = "none";
+  document.getElementById("app").style.display = "block";
+  document.getElementById("welcome").innerText = `Benvenuto, ${user}`;
+  renderTable();
+}
+
+function renderTable() {
+  const tbody = document.querySelector("#calendar tbody");
+  tbody.innerHTML = "";
+  timeSlots.forEach(time => {
+    const row = document.createElement("tr");
+    const timeCell = document.createElement("td");
+    timeCell.innerText = time;
+    row.appendChild(timeCell);
+
+    days.forEach(day => {
+      const cell = document.createElement("td");
+      const key = `${day}-${time}`;
+      if (reservations[key]) {
+        cell.innerText = reservations[key];
+        if (reservations[key] === currentUser) {
+          cell.classList.add("owned");
+          cell.onclick = () => {
+            if (confirm("Vuoi cancellare la tua prenotazione?")) {
+              delete reservations[key];
+              saveAndRender();
+            }
+          };
+        }
+      } else {
+        cell.onclick = () => {
+          if (confirm(`Vuoi prenotare ${day} alle ${time}?`)) {
+            reservations[key] = currentUser;
+            saveAndRender();
+          }
+        };
+      }
+      row.appendChild(cell);
+    });
+
+    tbody.appendChild(row);
+  });
+}
+
+function saveAndRender() {
+  localStorage.setItem("reservations", JSON.stringify(reservations));
+  renderTable();
+}
