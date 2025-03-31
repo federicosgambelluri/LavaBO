@@ -1,15 +1,4 @@
-const timeSlots = ["8:00", "9:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00"];
-const days = ["Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato", "Domenica"];
-let currentUser = null;
-let reservations = JSON.parse(localStorage.getItem("reservations")) || {};
-
-function login() {
-  const user = document.getElementById("user").value.trim();
-  if (!user) return alert("Inserisci un nome valido.");
-  currentUser = user;
-  document.getElementById("login").style.display = "none";
-  document.getElementById("app").style.display = "block";
-  document.getElementById("welcome").innerText = `Benvenuto, ${user}`;
+getElementById("welcome").innerText = `Benvenuto, ${user}`;
   renderTable();
 }
 
