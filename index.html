@@ -1,37 +1,49 @@
+
 <!DOCTYPE html>
 <html lang="it">
 <head>
   <meta charset="UTF-8">
-  <title>Gestione Lavatrice</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lavanderia Forni</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Gestione Turni Lavatrice</h1>
+  <header>
+    <h1>Lavanderia Forni</h1>
+  </header>
 
-  <div id="login">
-    <label for="user">Inserisci il tuo nome (es. APP 1):</label>
-    <input type="text" id="user">
-    <button onclick="login()">Accedi</button>
-  </div>
+  <main>
+    <div id="login">
+      <label for="user">Chi sei? (es. APP 1)</label>
+      <input type="text" id="user" placeholder="APP 1">
+      <button onclick="login()">Accedi</button>
+    </div>
 
-  <div id="app" style="display:none;">
-    <p id="welcome"></p>
-    <table id="calendar">
-      <thead>
-        <tr>
-          <th>Orario</th>
-          <th>Lunedì</th>
-          <th>Martedì</th>
-          <th>Mercoledì</th>
-          <th>Giovedì</th>
-          <th>Venerdì</th>
-          <th>Sabato</th>
-          <th>Domenica</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
+    <div id="app" style="display:none;">
+      <p id="welcome"></p>
+      <div class="table-container">
+        <table id="calendar">
+          <thead>
+            <tr>
+              <th>Orario</th>
+              <th>Lunedì</th>
+              <th>Martedì</th>
+              <th>Mercoledì</th>
+              <th>Giovedì</th>
+              <th>Venerdì</th>
+              <th>Sabato</th>
+              <th>Domenica</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>Creato da Dalia - 2025</p>
+  </footer>
 
   <script src="script.js"></script>
 </body>
