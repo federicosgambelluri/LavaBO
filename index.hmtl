@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestione Lavatrice</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Gestione Turni Lavatrice</h1>
+
+  <div id="login">
+    <label for="user">Inserisci il tuo nome (es. APP 1):</label>
+    <input type="text" id="user">
+    <button onclick="login()">Accedi</button>
+  </div>
+
+  <div id="app" style="display:none;">
+    <p id="welcome"></p>
+    <table id="calendar">
+      <thead>
+        <tr>
+          <th>Orario</th>
+          <th>Lunedì</th>
+          <th>Martedì</th>
+          <th>Mercoledì</th>
+          <th>Giovedì</th>
+          <th>Venerdì</th>
+          <th>Sabato</th>
+          <th>Domenica</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
