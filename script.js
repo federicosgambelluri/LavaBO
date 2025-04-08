@@ -67,20 +67,24 @@ function renderTable() {
 
 function postReservation(giorno, orario, utente) {
   const body = { giorno, orario, utente };
+  console.log("Invio prenotazione:", body);
+
   fetch(API_URL, {
     method: "POST",
     body: JSON.stringify(body),
     headers: { "Content-Type": "application/json" }
   })
-    .then(res => {
-      if (res.ok) {
+    .then(res => res.json())
+    .then(response => {
+      console.log("Risposta server:", response);
+      if (response.status === "success") {
         loadReservations();
       } else {
-        throw new Error("Errore nella prenotazione");
+        alert("Errore durante la prenotazione: " + (response.message || "sconosciuto"));
       }
     })
     .catch(err => {
-      console.error("Errore:", err);
-      alert("Errore durante la prenotazione.");
+      console.error("Errore fetch:", err);
+      alert("Errore durante la prenotazione (fetch).");
     });
 }
