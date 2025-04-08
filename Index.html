@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lavanderia Forni</title>
+  <style>
+    :root {
+      --rosa: #f7c1d9;
+      --rosa-scuro: #ec96bb;
+      --bianco: #fff;
+      --grigio: #eee;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: var(--bianco);
+      color: #333;
+    }
+
+    header {
+      background-color: var(--rosa);
+      color: #222;
+      padding: 15px;
+      text-align: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      margin: 0;
+    }
+
+    main {
+      padding: 20px;
+      max-width: 1100px;
+      margin: auto;
+    }
+
+    .info {
+      background-color: #fff3f8;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      border-left: 5px solid var(--rosa-scuro);
+    }
+
+    .info p {
+      margin: 0;
+    }
+
+    #login {
+      max-width: 300px;
+      margin: auto;
+      text-align: center;
+    }
+
+    #login input {
+      padding: 10px;
+      margin: 10px 0;
+      width: 100%;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    #login button {
+      padding: 10px 20px;
+      background-color: var(--rosa-scuro);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    #login button:hover {
+      background-color: #d978a4;
+    }
+
+    #welcome {
+      text-align: center;
+      font-weight: bold;
+      margin: 20px 0;
+    }
+
+    .table-container {
+      overflow-x: auto;
+      margin-bottom: 40px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: auto;
+      font-size: 14px;
+      min-width: 700px;
+    }
+
+    th, td {
+      border: 1px solid var(--grigio);
+      padding: 10px;
+      text-align: center;
+    }
+
+    td:hover {
+      background-color: #ffe2ec;
+      cursor: pointer;
+    }
+
+    .owned {
+      background-color: #ffe6f0;
+      font-weight: bold;
+    }
+
+    footer {
+      margin-top: 40px;
+      text-align: center;
+      font-size: 12px;
+      color: #777;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1 style="cursor:pointer;" onclick="location.reload()">Lavanderia Forni</h1>
+  </header>
+
+  <main>
+    <div class="info">
+      <p><strong>Istruzioni:</strong> </p>
+      <p>- Seleziona un turno cliccando su un orario libero.</p> 
+      <p>- Ogni utente può prenotare e cancellare solo i propri turni.</p>
+      <p>- <strong>Attendi il caricamento del calendario prima di interagire.</strong></p>
+      <br>
+      <br>
+      <p id="weekLabel"></p>
+    </div>
+
+    <div id="login">
+      <label for="user">Chi sei? (es. APP 1)</label>
+      <input type="text" id="user" placeholder="APP 1">
+      <button onclick="login()">Accedi</button>
+    </div>
+
+    <div id="app" style="display:none;">
+      <p id="welcome"></p>
+      <div id="tabelle"></div>
+    </div>
+  </main>
+
+  <footer>
+    <p>Creato da Dalia - 2025</p>
+  </footer>
+
+<script>
+  const timeSlots = Array.from({ length: 16 }, (_, i) => {
+  const h = 8 + i;
+  return `${String(h).padStart(2, '0')}:00`;
+  }).concat("23:55");
+
+    const days = ["Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato", "Domenica"];
+    const sheets = ["Lavatrice1", "Lavatrice2", "Asciugatrice"];
+    let currentUser = null;
+    let reservations = { Lavatrice1: {}, Lavatrice2: {}, Asciugatrice: {} };
+
+    function getWeekRangeString() {
+      const today = new Date();
+      const day = today.getDay();
+      const diffToMonday = today.getDate() - (day === 0 ? 6 : day - 1);
+      const monday = new Date(today.setDate(diffToMonday));
+      const sunday = new Date(monday);
+      sunday.setDate(monday.getDate() + 6);
+      const format = d => d.toLocaleDateString("it-IT");
+      return `Settimana dal ${format(monday)} al ${format(sunday)}`;
+    }
+
+    function login() {
+      let user = document.getElementById("user").value;
+      user = user.replace(/\s+/g, " ").toUpperCase();
+      if (!user) return alert("Inserisci un nome valido.");
+      currentUser = user;
+      document.getElementById("login").style.display = "none";
+      document.getElementById("app").style.display = "block";
+      document.getElementById("welcome").innerHTML = `Benvenuto, ${user} <button onclick='logout()' style='margin-left: 10px;'>Esci</button>`;
+      document.getElementById("weekLabel").innerText = getWeekRangeString();
+      loadAllReservations();
+    }
+
+    function loadAllReservations() {
+      document.getElementById("tabelle").innerHTML = ""; // Svuota
+      let loaded = 0;
+      sheets.forEach(sheet => {
+        google.script.run.withSuccessHandler(data => {
+          reservations[sheet] = {};
+          data.forEach(entry => {
+            const key = `${entry.giorno}-${entry.orario}`;
+            reservations[sheet][key] = entry.utente;
+          });
+          loaded++;
+          if (loaded === sheets.length) {
+            sheets.forEach(s => renderTable(s)); // Ordine fisso
+          }
+        })["getPrenotazioni" + sheet]();
+      });
+    }
+
+    function logout() {
+    window.location.href = window.location.href;
+    }
+
+    function renderTable(sheetName) {
+      const container = document.getElementById("tabelle");
+      const wrapper = document.createElement("div");
+      wrapper.className = "table-container";
+      const title = document.createElement("h2");
+      title.innerText = sheetName;
+      const table = document.createElement("table");
+
+      const thead = document.createElement("thead");
+      const headRow = document.createElement("tr");
+      const thTime = document.createElement("th");
+      thTime.innerText = "Orario";
+      headRow.appendChild(thTime);
+
+      // Calcola le date della settimana
+      const today = new Date();
+      const currentDay = today.getDay();
+      const diffToMonday = today.getDate() - (currentDay === 0 ? 6 : currentDay - 1);
+      const monday = new Date(today.setDate(diffToMonday));
+
+      days.forEach((day, i) => {
+        const th = document.createElement("th");
+        const date = new Date(monday);
+        date.setDate(monday.getDate() + i);
+        const formatted = date.toLocaleDateString("it-IT", { day: "2-digit", month: "2-digit" });
+        th.innerText = `${day}\n${formatted}`;
+        headRow.appendChild(th);
+      });
+
+      thead.appendChild(headRow);
+      table.appendChild(thead);
+
+      const tbody = document.createElement("tbody");
+      timeSlots.forEach(time => {
+        const row = document.createElement("tr");
+        const timeCell = document.createElement("td");
+        timeCell.innerText = time;
+        row.appendChild(timeCell);
+
+        days.forEach(day => {
+          const cell = document.createElement("td");
+          const key = `${day}-${time}`;
+          if (reservations[sheetName][key]) {
+            cell.innerText = reservations[sheetName][key];
+            if (reservations[sheetName][key] === currentUser) {
+              cell.classList.add("owned");
+              cell.onclick = () => {
+                if (confirm(`Vuoi eliminare questa prenotazione per ${day} alle ${time}?`)) {
+                  google.script.run.withSuccessHandler(() => loadAllReservations())
+                    .cancellaPrenotazione(sheetName, day, time, currentUser);
+                }
+              };
+            }
+          } else {
+            cell.onclick = () => {
+              if (confirm(`Vuoi prenotare ${sheetName} per ${day} alle ${time}?`)) {
+                google.script.run.withSuccessHandler(() => loadAllReservations())
+                  .postReservation(sheetName, day, time, currentUser);
+              }
+            };
+          }
+          row.appendChild(cell);
+        });
+
+        tbody.appendChild(row);
+      });
+
+      table.appendChild(tbody);
+      wrapper.appendChild(title);
+      wrapper.appendChild(table);
+      container.appendChild(wrapper);
+    }
+</script>
+
+</body>
+</html>
